@@ -3,14 +3,11 @@ from codecs import open as codecs_open
 from gzip import open as g_zip_open
 from json import loads as json_load_str
 from random import random
+import sys
 
 # split a matches dump up into learning, testing, and validation datasets
-def make_data_files (
-    path_to_matches_dump,
-    path_to_output,
-    num_matches_to_write,
-    testing_rate,
-    validation_rate):
+def make_data_files (path_to_matches_dump, path_to_output,
+        num_matches_to_write, testing_rate, validation_rate):
 
     # open the file as a stream and up-gzip it
     f = g_zip_open(path_to_matches_dump, 'r')
@@ -32,13 +29,15 @@ def make_data_files (
 
     # print the algorithm's progress
     def print_status (prefix):
-        print(prefix + " L %d T %d V %d" % (num_written_learning, 
-            num_written_testing, num_written_validation))
+        print(prefix + " L %d/%d T %d V %d" % (num_written_learning,
+            num_matches_to_write, num_written_testing, num_written_validation))
+        sys.stdout.flush()
 
     for line in f:
 
         # periodically print the algorithm's progress
-        if num_attempts % 25 == 0: print_status("progress:")
+        if num_attempts % (num_matches_to_write * 0.1) == 0:
+            print_status("progress:")
 
         # attempt to parse the match as a JSON object
         num_attempts += 1
@@ -71,5 +70,5 @@ def make_data_files (
     # done! print the final status of the algorithm
     print_status("done! final:")
 
-# actually run the code on your matches dump
-make_data_files('./yasp-dump-2015-12-18.json.gz', './data/', 50, 0.1, 0.1)
+# actually run the code on your matches dump!
+make_data_files('./yasp-dump-2015-12-18.json.gz', './data_5/', 5, 0.1, 0.1)
